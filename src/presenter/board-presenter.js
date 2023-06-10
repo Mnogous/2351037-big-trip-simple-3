@@ -1,10 +1,9 @@
-import { FormCreatingView } from '../view/form-creating-view.js';
-import { FormEditingView } from '../view/form-editing-view.js';
-import { EventsListView } from '../view/events-list-view.js';
-import { RoutePointView } from '../view/route-point-view.js';
-import { SortView } from '../view/sort-view.js';
-import { render } from '../render.js';
-
+import FormCreatingView from '../view/form-creating-view.js';
+import FormEditingView from '../view/form-editing-view.js';
+import EventsListView from '../view/events-list-view.js';
+import RoutePointView from '../view/route-point-view.js';
+import SortView from '../view/sort-view.js';
+import {render} from '../render.js';
 
 export default class BoardPresenter {
   eventListComponent = new EventsListView();

@@ -31,7 +31,7 @@ const createNewRoutePointTemplate = () => `<li class="trip-events__item">
 </div>
 </li>`;
 
-export class RoutePointView {
+export default class RoutePointView {
   getTemplate() {
     return createNewRoutePointTemplate();
   }

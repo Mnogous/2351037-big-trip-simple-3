@@ -142,7 +142,7 @@ const createFormCreatingTemplate = () => `<li class="trip-events__item">
 </form>
 </li>`;
 
-export class FormCreatingView {
+export default class FormCreatingView {
   getTemplate() {
     return createFormCreatingTemplate();
   }

@@ -136,7 +136,7 @@ const createFormEditingTemplate = () => `<li class="trip-events__item">
 </form>
 </li>`;
 
-export class FormEditingView {
+export default class FormEditingView {
   getTemplate() {
     return createFormEditingTemplate();
   }
