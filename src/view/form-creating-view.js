@@ -176,7 +176,7 @@ export default class FormCreatingView extends AbstractView {
     this.#handleSubmit = onSubmit;
     this.#handleDeleteClick = onDeleteClick;
 
-    this.element.querySelector('form').addEventListener('click', this.#submitHandler);
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#submitHandler);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler);
   }
 
