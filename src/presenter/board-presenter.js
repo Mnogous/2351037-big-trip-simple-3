@@ -6,9 +6,11 @@ import RoutePointView from '../view/route-point-view.js';
 import SortView from '../view/sort-view.js';
 import AddButtonView from '../view/add-button-view';
 import {render, RenderPosition} from '../framework/render.js';
+import { getDestination } from '../mocks/destination-mock.js';
+import {getRoutePoint, comparePointsByPriceHihgLow, comparePointsByDateLowHigh } from '../mocks/route-point-mock.js';
+import FilterView from '../view/filter-view.js';
 
 export default class BoardPresenter {
-  #numberOfPoints = 0;
   #boardContainer = null;
   #routePointsModel = null;
   #destinationModel = null;
@@ -17,6 +19,11 @@ export default class BoardPresenter {
 
   #boardPoints = [];
   #boardEditingForms = [];
+
+  #filterContainer = document.querySelector('.trip-controls__filters');
+  #currentDate = new Date().toJSON();
+  #boardFuturePoints = [];
+  #isFuture = false;
 
   constructor(boardContainer, routePointsModel, destinationModel){
     this.#boardContainer = boardContainer;
@@ -27,7 +34,6 @@ export default class BoardPresenter {
   init(){
     this.#boardPoints = this.#routePointsModel.routePoints;
     this.#boardEditingForms = this.#destinationModel.destinations;
-    this.#numberOfPoints = this.#boardPoints.length;
     this.#renderBoard();
   }
 
@@ -74,12 +80,16 @@ export default class BoardPresenter {
     }
 
     function deletePoint() {
+      for (const point of this.#boardPoints){
+        if (point.id === pointComponent.routePoint.id) {
+          this.#boardPoints = this.#boardPoints.filter((el) => el.id !== point.id);
+        }
+      }
       formComponent.element.remove();
       pointComponent.element.remove();
       formComponent.removeElement();
       pointComponent.removeElement();
-      this.#numberOfPoints--;
-      if (this.#numberOfPoints <= 0) {
+      if (this.#boardPoints.length <= 0) {
         while (this.#boardContainer.firstChild) {
           this.#boardContainer.removeChild(this.#boardContainer.firstChild);
         }
@@ -90,16 +100,59 @@ export default class BoardPresenter {
   }
 
   #renderBoard() {
-    render(new SortView(), this.#boardContainer);
-    render(this.#eventListComponent, this.#boardContainer);
+    const newSortingView = new SortView({
+      onDateChange: () => {
+        sortByDateLowHigh.call(this);
+      },
+      onPriceChange: () => {
+        sortByPriceHighLow.call(this);
+      }
+    });
 
-    for (let i = 0; i < this.#boardPoints.length; i++) {
-      this.#renderPoint(this.#boardPoints[i], this.#boardEditingForms[i]);
+    function addNewSortingView(){
+      render(newSortingView, this.#boardContainer, RenderPosition.AFTERBEGIN);
     }
+
+    function sortByPriceHighLow() {
+      if (!this.#isFuture){
+        this.#boardPoints.sort(comparePointsByPriceHihgLow);
+        renderPoints.call(this);
+      } else {
+        this.#boardFuturePoints.sort(comparePointsByPriceHihgLow);
+        renderPoints.call(this);
+      }
+    }
+
+    function sortByDateLowHigh() {
+      if (!this.#isFuture){
+        this.#boardPoints.sort(comparePointsByDateLowHigh);
+        renderPoints.call(this);
+      } else {
+        this.#boardFuturePoints.sort(comparePointsByDateLowHigh);
+        renderPoints.call(this);
+      }
+    }
+
+    const newFilterView = new FilterView({
+      onEverythingChange: () => {
+        this.#isFuture = false;
+        renderPoints.call(this);
+        newSortingView.element[0].checked = true;
+        sortByDateLowHigh.call(this);
+      },
+      onFutureChange: () => {
+        this.#isFuture = true;
+        renderPoints.call(this);
+        newSortingView.element[0].checked = true;
+        sortByDateLowHigh.call(this);
+      }
+    });
+
+    render(newFilterView, this.#filterContainer);
 
     new AddButtonView({
       onClick: () => {
-        if (this.#numberOfPoints === 0){
+        if (this.#boardPoints.length === 0){
           addNewPointRemoveEmptyBanner.call(this);
         } else {
           addNewPoint.call(this);
@@ -111,7 +164,7 @@ export default class BoardPresenter {
       while (this.#boardContainer.firstChild) {
         this.#boardContainer.removeChild(this.#boardContainer.firstChild);
       }
-      render(new SortView(), this.#boardContainer);
+      addNewSortingView.call(this);
       render(this.#eventListComponent, this.#boardContainer);
       addNewPoint.call(this);
     }
@@ -129,28 +182,55 @@ export default class BoardPresenter {
 
       const formCreating = new FormCreatingView({
         onSubmit: () => {
+          const newRoutePoint = getRoutePoint();
+          const newEditingForm = getDestination();
+          this.#boardPoints = [...this.#boardPoints,newRoutePoint];
+          this.#boardEditingForms = [...this.#boardEditingForms,newEditingForm];
           deleteForm.call(this);
-          this.#renderPoint(this.#boardPoints[0], this.#boardEditingForms[0]);
+          this.#renderPoint(newRoutePoint, newEditingForm);
+          if (newSortingView.element[0].checked) {
+            sortByDateLowHigh.call(this);
+          } else {
+            sortByPriceHighLow.call(this);
+          }
           document.removeEventListener('keydown', escKeyDownHandlerEdit);
         },
         onDeleteClick: () => {
-          this.#numberOfPoints--;
           deleteForm.call(this);
           document.removeEventListener('keydown', escKeyDownHandlerEdit);
         }
       });
 
       render(formCreating, this.#eventListComponent.element, RenderPosition.AFTERBEGIN);
-      this.#numberOfPoints++;
 
       function deleteForm() {
-        this.#eventListComponent.element.removeChild(formCreating.element);
+        formCreating.element.remove();
         formCreating.removeElement();
-        if (this.#numberOfPoints <= 0) {
+        if (this.#boardPoints.length <= 0) {
           while (this.#boardContainer.firstChild) {
             this.#boardContainer.removeChild(this.#boardContainer.firstChild);
           }
           render(new EmptyView(),this.#boardContainer);
+        }
+      }
+    }
+    render(this.#eventListComponent, this.#boardContainer);
+    addNewSortingView.call(this);
+    this.#boardPoints.sort(comparePointsByDateLowHigh);
+    renderPoints.call(this);
+
+    function renderPoints() {
+      while (this.#eventListComponent.element.firstChild) {
+        this.#eventListComponent.element.removeChild(this.#eventListComponent.element.firstChild);
+      }
+      if (!this.#isFuture) {
+        for (let i = 0; i < this.#boardPoints.length; i++) {
+          this.#renderPoint(this.#boardPoints[i], this.#boardEditingForms[i]);
+        }
+      } else {
+        this.#boardFuturePoints = this.#boardFuturePoints.filter((point) => point.dateFrom >= this.#currentDate);
+        for (let i = 0; i < this.#boardFuturePoints.length; i++) {
+          this.#renderPoint(this.#boardFuturePoints[i], this.#boardEditingForms[i]);
         }
       }
     }
