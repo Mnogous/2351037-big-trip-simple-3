@@ -25,11 +25,11 @@ const generateType = () => {
 };
 
 export const getRoutePoint = () => {
-  const date = generateDate();
+  const dates = generateDate();
   return ({
     basePrice: getRandomIntInRange(1100, 1900),
-    dateFrom: date[0],
-    dateTo: date[1],
+    dateFrom: dates.dateFrom,
+    dateTo: dates.dateTo,
     destination: generateDestination(),
     id: getRandomIntInRange(1, 100),
     offers: generateOffers(),
