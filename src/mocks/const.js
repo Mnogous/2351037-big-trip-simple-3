@@ -61,42 +61,6 @@ export const OFFERS = [
   }
 ];
 
-export const getOfferName = (offerId) => OFFERS.find((offer) => offer.id === offerId).title;
-export const getOfferPrice = (offerId) => OFFERS.find((offer) => offer.id === offerId).price;
-
-const taxiOffers = [1, 3];
-const busOffers = [5, 6];
-const trainOffers = [4, 5, 7];
-const shipOffers = [4, 5, 7];
-const driveOffers = [8];
-const flightOffers = [4, 5, 6, 7];
-const checkInOffers = [9];
-const sightseeingOffers = [];
-const restaurantOffers = [5];
-
-export const getArrayFromType = (type) => {
-  switch (type) {
-    case 'taxi':
-      return taxiOffers;
-    case 'bus':
-      return busOffers;
-    case 'train':
-      return trainOffers;
-    case 'ship':
-      return shipOffers;
-    case 'drive':
-      return driveOffers;
-    case 'flight':
-      return flightOffers;
-    case 'check-in':
-      return checkInOffers;
-    case 'sightseeing':
-      return sightseeingOffers;
-    case 'restaurant':
-      return restaurantOffers;
-  }
-};
-
 export const DATES = [
   {
     dateFrom: '2019-07-11T11:22:13.375Z',

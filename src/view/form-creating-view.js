@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getDestination } from '../mocks/destination-mock.js';
 
 const createFormCreatingTemplate = () => {
@@ -167,22 +167,30 @@ const createFormCreatingTemplate = () => {
   </li>`;
 };
 
-export default class FormCreatingView {
-  #element = null;
+export default class FormCreatingView extends AbstractView {
+  #handleSubmit = null;
+  #handleDeleteClick = null;
+
+  constructor({onSubmit, onDeleteClick}){
+    super();
+    this.#handleSubmit = onSubmit;
+    this.#handleDeleteClick = onDeleteClick;
+
+    this.element.querySelector('form').addEventListener('click', this.#submitHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler);
+  }
 
   get template() {
     return createFormCreatingTemplate();
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  #submitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleSubmit();
+  };
 
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick();
+  };
 }
