@@ -10,7 +10,6 @@ export const DESCRIPTION = [
 ];
 
 export const TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
-
 export const CITIES = ['Paris', 'Chicago', 'Moscow', 'Berlin', 'Tokyo', 'Bogota', 'Rome', 'Warsaw', 'London'];
 
 export const OFFERS = [
