@@ -1,8 +1,7 @@
-import { createElement } from '../render.js';
-import { getDestination } from '../mocks/destination-mock.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-const createFormEditingTemplate = () => {
-  const {description, name, basePrice} = getDestination();
+const createFormEditingTemplate = (formEditing) => {
+  const {description, name, basePrice} = formEditing;
 
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -161,22 +160,41 @@ const createFormEditingTemplate = () => {
   </li>`;
 };
 
-export default class FormEditingView {
-  #element = null;
+export default class FormEditingView extends AbstractView {
+  #formEditing = null;
+  #handleSubmit = null;
+  #handleDeleteClick = null;
+  #handleRollUpClick = null;
+
+  constructor({formEditing, onSubmit, onDeleteClick, onRollUpClick}) {
+    super();
+    this.#formEditing = formEditing;
+    this.#handleSubmit = onSubmit;
+    this.#handleDeleteClick = onDeleteClick;
+    this.#handleRollUpClick = onRollUpClick;
+
+    this.element.querySelector('form').addEventListener('click', this.#submitHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollUpClickHandler);
+  }
 
   get template() {
-    return createFormEditingTemplate();
+    return createFormEditingTemplate(this.#formEditing);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  #submitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleSubmit();
+  };
 
-    return this.#element;
-  }
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick();
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #rollUpClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleRollUpClick();
+  };
+
 }
