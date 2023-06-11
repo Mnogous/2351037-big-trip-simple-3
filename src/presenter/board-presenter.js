@@ -1,3 +1,4 @@
+import { EmptyView } from '../view/empty-view.js';
 import FormEditingView from '../view/form-editing-view.js';
 import EventsListView from '../view/events-list-view.js';
 import RoutePointView from '../view/route-point-view.js';
@@ -5,6 +6,7 @@ import SortView from '../view/sort-view.js';
 import {render} from '../render.js';
 
 export default class BoardPresenter {
+  #numberOfPoints = 0;
   #boardContainer = null;
   #routePointsModel = null;
   #destinationModel = null;
@@ -23,6 +25,7 @@ export default class BoardPresenter {
   init(){
     this.#boardPoints = this.#routePointsModel.routePoints;
     this.#boardEditingForms = this.#destinationModel.destinations;
+    this.#numberOfPoints = this.#boardPoints.length;
 
     render(new SortView(), this.#boardContainer);
     render(this.#eventListComponent, this.#boardContainer);
@@ -46,6 +49,15 @@ export default class BoardPresenter {
 
     const deletePoint = () => {
       this.#eventListComponent.element.removeChild(formComponent.element);
+      formComponent.removeElement();
+      pointComponent.removeElement();
+      this.#numberOfPoints--;
+      if (this.#numberOfPoints <= 0) {
+        while (this.#boardContainer.firstChild) {
+          this.#boardContainer.removeChild(this.#boardContainer.firstChild);
+        }
+        render(new EmptyView(), this.#boardContainer);
+      }
     };
 
     const escKeyDownHandler = (evt) => {
