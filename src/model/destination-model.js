@@ -1,11 +1,11 @@
 import {getDestination} from '../mocks/destination-mock';
 
-const DESTINATION_COUNT = 1;
+const DESTINATION_COUNT = 5;
 
 export default class DestinationModel {
-  destinations = Array.from({length: DESTINATION_COUNT}, getDestination);
+  #destinations = Array.from({length: DESTINATION_COUNT}, getDestination);
 
-  getDestinations() {
-    return this.destinations;
+  get destinations() {
+    return this.#destinations;
   }
 }
