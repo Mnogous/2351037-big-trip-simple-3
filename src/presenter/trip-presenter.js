@@ -1,14 +1,16 @@
-import {render} from '../framework/render.js';
+import {render, remove} from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
 import SortView from '../view/sort-view.js';
 import EventsListView from '../view/events-list-view.js';
 import EmptyView from '../view/empty-view.js';
-import { generateSort } from '../mocks/sort.js';
-import { updateItem } from '../utils.js';
+import { SortType } from '../mocks/const.js';
+import { updateItem, sortByDay, sortByPrice } from '../utils.js';
 
 export default class Presenter {
   #pointsListComponent = new EventsListView();
   #emptyListComponent = new EmptyView();
+  #sortComponent = new SortView();
+  #currentSortType = SortType.DAY;
   #container = null;
   #tripModel = null;
   #pointsList = [];
@@ -21,7 +23,6 @@ export default class Presenter {
 
   init() {
     this.#pointsList = this.#tripModel.points;
-    this.sortingComponent = new SortView(generateSort(this.#pointsList));
     this.#renderPage();
   }
 
@@ -36,7 +37,25 @@ export default class Presenter {
   }
 
   #renderSort() {
-    render(this.sortingComponent, this.#container);
+    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
+    render(this.#sortComponent, this.#container);
+  }
+
+  #renderList = () => {
+    render(this.#pointsListComponent, this.#container);
+    for (let i = 0; i < this.#pointsList.length; i++) {
+      this.#renderPoint(this.#pointsList[i]);
+    }
+  };
+
+  #renderPage() {
+    if(this.#pointsList.length === 0) {
+      this.#renderEmptyList();
+      return;
+    }
+
+    this.#renderSort(this.#currentSortType);
+    this.#renderList();
   }
 
   #clearPointList = () => {
@@ -53,15 +72,31 @@ export default class Presenter {
     this.#pointPresenter.forEach((presenter) => presenter.resetView());
   };
 
-  #renderPage() {
-    this.#renderSort();
-    render(this.#pointsListComponent, this.#container);
-    if(this.#pointsList.length === 0) {
-      this.#renderEmptyList();
-    } else {
-      for (let i = 0; i < this.#pointsList.length; i++) {
-        this.#renderPoint(this.#pointsList[i]);
-      }
+  #handleSortTypeChange = (sortType) => {
+    if(this.#currentSortType === sortType) {
+      return;
     }
-  }
+
+    this.#sortPoints(sortType);
+    this.#updateSortMarkup();
+    this.#clearPointList();
+    this.#renderList();
+  };
+
+  #sortPoints = (sortType) => {
+    switch(sortType) {
+      case SortType.DAY:
+        this.#pointsList.sort(sortByDay);
+        break;
+      case SortType.PRICE:
+        this.#pointsList.sort(sortByPrice);
+        break;
+    }
+    this.#currentSortType = sortType;
+  };
+
+  #updateSortMarkup = () => {
+    remove(this.#sortComponent);
+    this.#renderSort();
+  };
 }
