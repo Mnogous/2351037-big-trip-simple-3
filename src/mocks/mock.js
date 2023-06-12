@@ -1,4 +1,4 @@
-import { getRandomInt, getMockText, sort, filter } from '../utils.js';
+import { getRandomInt, getMockText, sort, filter, getFormattedDate } from '../utils.js';
 import { POINT_TYPES } from './const.js';
 import dayjs from 'dayjs';
 
@@ -7,7 +7,7 @@ const generatePictures = () => {
   for (let i = 0; i < res.length; i++) {
     res[i] = {
       'src': `http://picsum.photos/300/200?r=${getRandomInt(Number.MAX_SAFE_INTEGER)}`,
-      'description': getMockText(getRandomInt(50)),
+      'description': getMockText(getRandomInt(50))
     };
   }
   return res;
@@ -20,7 +20,7 @@ for (let i = 0; i < mockDestinationNamesList.length; i++) {
     'id': i,
     'description': getMockText(getRandomInt(200)),
     'name': mockDestinationNamesList[i],
-    'pictures': generatePictures(),
+    'pictures': generatePictures()
   };
 }
 
@@ -47,11 +47,11 @@ const generateOffers = () => {
 const generateType = () => POINT_TYPES[getRandomInt(POINT_TYPES.length)];
 
 const generateDate = () => {
-  const dateFrom = dayjs().add(getRandomInt(600000), 'minute');
-  const dateTo = dateFrom.add(getRandomInt(1000), 'minute');
+  const dateFrom = dayjs();
+  const dateTo = dateFrom.add(getRandomInt(24), 'hour');
   return {
-    'date_from': dateFrom,
-    'date_to': dateTo,
+    'date_from': getFormattedDate(dateFrom),
+    'date_to': getFormattedDate(dateTo)
   };
 };
 

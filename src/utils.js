@@ -1,9 +1,11 @@
 import dayjs from 'dayjs';
-import { SortType, FilterType } from './mocks/const';
+import { SortType, FilterType, MODEL_DATE_FORMAT } from './mocks/const';
 
 export const getRandomInt = (upperBound = 100) => (Math.floor(Math.random() * upperBound));
-export const getFormattedDate = (eventDate, format) => dayjs(eventDate).format(format);
-export const isEventUpcoming = (date) => !dayjs(date).isBefore(dayjs(), 'D');
+export const getFormattedDate = (eventDate, format = MODEL_DATE_FORMAT) => dayjs(eventDate).format(format);
+export const isEventUpcoming = (date) => !dayjs(date).isBefore(dayjs(), 'day');
+export const turnModelDateToFramework = (date) => dayjs(date).format('DD/MM/YY HH:mm');
+export const compareDates = (a, b) => dayjs(a).diff(dayjs(b)) < 0;
 
 export const getMockText = (len) => {
   const mockText = `
