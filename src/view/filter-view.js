@@ -1,39 +1,27 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { capitalize } from '../utils.js';
 
-const createFilterTemplate = () => `<form class="trip-filters" action="#" method="get">
-    <div class="trip-filters__filter">
-      <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything"  checked="">
-      <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
-    </div>
-    <div class="trip-filters__filter">
-      <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
-      <label class="trip-filters__filter-label" for="filter-future">Future</label>
-    </div>
+const createFilterItem = (filter) => (
+  `<div class="trip-filters__filter">
+  <input id="filter-${filter.name}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter.name}">
+  <label class="trip-filters__filter-label" for="filter-${filter.name}">${capitalize(filter.name)}</label>
+  </div>`
+);
+
+const createFilterTemplate = (filterItems) => (
+  `<form class="trip-filters" action="#" method="get">
+    ${filterItems.map((item) => createFilterItem(item)).join('')}
     <button class="visually-hidden" type="submit">Accept filter</button>
-  </form>`;
+  </form>`
+);
 
 export default class FilterView extends AbstractView {
-  #handleEverythingChange = null;
-  #handleFutureChange = null;
-
-  constructor({onEverythingChange, onFutureChange}){
+  constructor(filters) {
     super();
-    this.#handleEverythingChange = onEverythingChange;
-    this.#handleFutureChange = onFutureChange;
-
-    this.element.querySelector('input[value=everything]').addEventListener('change', this.#everythingChangeHandler);
-    this.element.querySelector('input[value=future]').addEventListener('change', this.#futureChangeHandler);
+    this.filters = filters;
   }
 
-  get template() {
-    return createFilterTemplate();
+  get template () {
+    return createFilterTemplate(this.filters);
   }
-
-  #everythingChangeHandler = () => {
-    this.#handleEverythingChange();
-  };
-
-  #futureChangeHandler = () => {
-    this.#handleFutureChange();
-  };
 }
