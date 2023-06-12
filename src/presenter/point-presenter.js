@@ -10,9 +10,10 @@ const Mode = {
 export default class PointPresenter {
   #pointsListContainer = null;
   #pointComponent = null;
-  #editPointComponent = null;
+  #pointEditComponent = null;
   #changeData = null;
   #changeMode = null;
+  #point = null;
 
   #mode = Mode.DEFAULT;
 
@@ -23,30 +24,20 @@ export default class PointPresenter {
   }
 
   init(point) {
+    this.#point = point;
+
     const prevPointComponent = this.#pointComponent;
-    const prevEditPointComponent = this.#editPointComponent;
+    const prevPointEditComponent = this.#pointEditComponent;
 
     this.#pointComponent = new RoutePointView(point);
-    this.#editPointComponent = new FormEditingView(point);
+    this.#pointEditComponent = new FormEditingView(point);
 
-    this.#pointComponent.setClickHandler (() => {
-      this.#replacePointWithForm();
-      document.addEventListener('keydown', this.#closeFormOnEscape);
-    });
+    this.#pointComponent.setEditButtonClickHandler(this.#handleEditClick);
+    this.#pointEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#pointEditComponent.setFormResetHandler(this.#replaceFormToPoint);
 
-    this.#editPointComponent.setSubmitHandler((task) => {
-      this.#changeData(task);
-      this.#replaceFormWithPoint();
-      document.removeEventListener('keydown', this.#closeFormOnEscape);
-    });
-
-    this.#editPointComponent.setClickHandler(() => {
-      this.#replaceFormWithPoint();
-      document.removeEventListener('keydown', this.#closeFormOnEscape);
-    });
-
-    if (prevEditPointComponent === null || prevPointComponent === null) {
-      render(this.#pointComponent, this.#pointsListContainer);
+    if (prevPointComponent === null || prevPointEditComponent === null) {
+      render(this.#pointComponent, this.#pointsListContainer.element);
       return;
     }
 
@@ -55,40 +46,60 @@ export default class PointPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editPointComponent, prevEditPointComponent);
+      replace(this.#pointEditComponent, prevPointEditComponent);
+    }
+
+    if (this.#pointsListContainer.element.contains(prevPointComponent.element)) {
+      replace(this.#pointComponent, prevPointComponent);
+    }
+
+    if (this.#pointsListContainer.element.contains(prevPointEditComponent.element)) {
+      replace(this.#pointEditComponent, prevPointEditComponent);
     }
 
     remove(prevPointComponent);
-    remove(prevEditPointComponent);
+    remove(prevPointEditComponent);
   }
-
-  destroy = () => {
-    remove(this.#pointComponent);
-    remove(this.#editPointComponent);
-  };
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#replaceFormWithPoint();
+      this.#pointEditComponent.reset(this.#point);
+      this.#replaceFormToPoint();
     }
   };
 
-  #replacePointWithForm() {
-    replace(this.#editPointComponent, this.#pointComponent);
+  destroy = () => {
+    remove(this.#pointComponent);
+    remove(this.#pointEditComponent);
+  };
+
+  #replacePointToForm = () => {
+    replace(this.#pointEditComponent, this.#pointComponent);
+    document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#changeMode();
     this.#mode = Mode.EDITING;
-  }
+  };
 
-  #replaceFormWithPoint() {
-    replace(this.#pointComponent, this.#editPointComponent);
+  #replaceFormToPoint = () => {
+    replace(this.#pointComponent, this.#pointEditComponent);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
-  }
+  };
 
-  #closeFormOnEscape = (evt) => {
-    if(evt.keyCode === 27) {
+  #escKeyDownHandler = (evt) => {
+    if (evt.keyCode === 27) {
       evt.preventDefault();
-      this.#replaceFormWithPoint();
-      document.removeEventListener('keydown', this.#closeFormOnEscape);
+      this.#pointEditComponent.reset(this.#point);
+      this.#replaceFormToPoint();
     }
+  };
+
+  #handleEditClick = () => {
+    this.#replacePointToForm();
+  };
+
+  #handleFormSubmit = (point) => {
+    this.#changeData(point);
+    this.#replaceFormToPoint();
   };
 }
