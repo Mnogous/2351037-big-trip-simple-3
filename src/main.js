@@ -9,7 +9,6 @@ const filterFormContainer = document.querySelector('.trip-controls__filters');
 
 const pointsModel = new TripModel();
 const tripPointsPresenter = new TripPresenter(tripEventsContainer, pointsModel);
-
 const filters = generateFilter(pointsModel.points);
 
 render(new FilterView(filters), filterFormContainer);
