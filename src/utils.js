@@ -7,11 +7,30 @@ export function getRandomIntInRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-const EVENT_DATE_FORMAT = 'MMM D';
-const TIME_FORMAT = 'H:mm';
+export const fullDate = (date) => date.format('YYYY-MM-DD HH:mm');
+export const getTime = (date) => date.format('HH:mm');
+export const getWithoutTime = (date) => date.format('YYYY-MM-DD');
+export const shortDate = (date) => date.format('MMM D');
 
-export const convertToEventDateTime = (date) => date.substring(0, date.indexOf('T'));
-export const convertToEventDate = (date) => dayjs(date).format(EVENT_DATE_FORMAT);
-export const convertToDateTime = (date) => date.substring(0, date.indexOf('.'));
-export const convertToTime = (date) => dayjs(date).format(TIME_FORMAT);
-export const convertToUpperCase = (type) => type.charAt(0).toUpperCase() + type.slice(1);
+export const capitalize = (type) => type.charAt(0).toUpperCase() + type.slice(1);
+export const isTripDateBeforeToday = (date) => date.isBefore(dayjs(), 'D') || date.isSame(dayjs(), 'D');
+
+export const updateItem = (items, update) => {
+  const index = items.findIndex((item) => item.id === update.id);
+
+  if (index === -1) {
+    return items;
+  }
+
+  return [
+    ...items.slice(0, index),
+    update,
+    ...items.slice(index + 1),
+  ];
+};
+
+export const getDates = () => {
+  const start = getRandomIntInRange(1, 15);
+  const end = getRandomIntInRange(16, 31);
+  return [dayjs().add(start, 'd'), dayjs().add(end, 'd')];
+};
