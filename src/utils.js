@@ -34,3 +34,7 @@ export const getDates = () => {
   const end = getRandomIntInRange(16, 31);
   return [dayjs().add(start, 'd'), dayjs().add(end, 'd')];
 };
+
+export const sortByDay = (pa, pb) => pa.dateFrom.toDate() - pb.dateFrom.toDate();
+
+export const sortByPrice = (pa, pb) => pa.price - pb.price;

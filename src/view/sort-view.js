@@ -1,27 +1,42 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { capitalize } from '../utils.js';
+import { SortType } from '../mocks/const.js';
 
-const createItemTemplate = (sort) => `
-<div class="trip-sort__item  trip-sort__item--${sort.name}">
-<input id="sort-${sort.name}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sort.name}" disabled>
-<label class="trip-sort__btn" for="sort-${sort.name}">${capitalize(sort.name)}</label>
+const createItemTemplate = (sort, status) => `
+<div class="trip-sort__item  trip-sort__item--${sort}">
+<input id="sort-${sort}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sort}" ${status}>
+<label class="trip-sort__btn" for="sort-${sort}">${capitalize(sort)}</label>
 </div>`;
 
-const createSortTemplate = (sortItems) => (
+const createSortTemplate = (activeSort) => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-	${sortItems.map((item) => createItemTemplate(item)).join('')}
+  ${createItemTemplate(SortType.DAY, activeSort === SortType.DAY ? 'checked' : '')}
+  ${createItemTemplate(SortType.EVENT, 'disabled')}
+  ${createItemTemplate(SortType.TIME, 'disabled')}
+  ${createItemTemplate(SortType.PRICE, activeSort === SortType.PRICE ? 'checked' : '')}
+  ${createItemTemplate(SortType.OFFERS, 'disabled')}
   </form>`
 );
 
 export default class SortView extends AbstractView {
-  #sorts = null;
-
-  constructor(sorts) {
-    super();
-    this.#sorts = sorts;
-  }
+  #activeSort = SortType.DAY;
 
   get template() {
-    return createSortTemplate(this.#sorts);
+    return createSortTemplate(this.#activeSort);
   }
+
+  setSortTypeChangeHandler = (callback) => {
+    this._callback.sortTypeChange = callback;
+    this.element.addEventListener('click', this.#sortTypeChangeHandler);
+  };
+
+  #sortTypeChangeHandler = (evt) => {
+    if (evt.target.tagName !== 'LABEL') {
+      return;
+    }
+
+    evt.preventDefault();
+    this.#activeSort = evt.target.outerText.toLowerCase();
+    this._callback.sortTypeChange(evt.target.outerText.toLowerCase());
+  };
 }
