@@ -1,6 +1,8 @@
 import {render, replace, remove} from '../framework/render.js';
 import FormEditingView from '../view/form-editing-view.js';
 import RoutePointView from '../view/route-point-view.js';
+import { UserAction, UpdateType } from '../mocks/const.js';
+import { compareDates } from '../utils.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -35,6 +37,7 @@ export default class PointPresenter {
     this.#pointComponent.setEditButtonClickHandler(this.#handleEditClick);
     this.#pointEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#pointEditComponent.setFormResetHandler(this.#replaceFormToPoint);
+    this.#pointEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
       render(this.#pointComponent, this.#pointsListContainer.element);
@@ -98,8 +101,21 @@ export default class PointPresenter {
     this.#replacePointToForm();
   };
 
-  #handleFormSubmit = (point) => {
-    this.#changeData(point);
+  #handleFormSubmit = (update) => {
+    const isMinorUpdate = compareDates(update.date_from); // possible filter problems later
+    this.#changeData(
+      UserAction.UPDATE_POINT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update,
+    );
     this.#replaceFormToPoint();
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#changeData(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
   };
 }
