@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getFormattedDate, getIdFromTag, compareDates, turnModelDateToFramework } from '../utils.js';
+import { getFormattedDate, getIdFromTag, compareDates, turnModelDateToFramework, validateNumber } from '../utils.js';
 import { POINT_TYPES } from '../mocks/const.js';
-import { destinationsStorage, offersStorage } from '../mocks/mock.js';
+import { destinationsStorage, offersStorage, getDefaultPoint } from '../mocks/mock.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -60,7 +60,7 @@ const createPointPriceTemplate = (id, price) => (`
       <span class="visually-hidden">Price</span>
       &euro;
     </label>
-    <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${price}">
+    <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${validateNumber(price)}">
   </div>
 `);
 
@@ -143,7 +143,7 @@ export default class FormEditingView extends AbstractStatefulView {
   _state = null;
   #datepickers = [];
 
-  constructor(point) {
+  constructor(point = getDefaultPoint()) {
     super();
     this._state = FormEditingView.parsePointToState(point);
 
@@ -172,6 +172,7 @@ export default class FormEditingView extends AbstractStatefulView {
     this.#setInnerHandlers();
     this.#setDatepickers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   };
 
   #setInnerHandlers = () => {
@@ -291,6 +292,17 @@ export default class FormEditingView extends AbstractStatefulView {
   #formResetHandler = (evt) => {
     evt.preventDefault();
     this._callback.formReset();
+  };
+
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn')
+      .addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(FormEditingView.parseStateToPoint(this._state));
   };
 
   static parsePointToState = (point) => {

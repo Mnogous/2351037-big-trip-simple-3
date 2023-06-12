@@ -1,11 +1,13 @@
 import dayjs from 'dayjs';
-import { SortType, FilterType, MODEL_DATE_FORMAT } from './mocks/const';
+import { SortType, FilterType, MODEL_DATE_FORMAT } from './mocks/const.js';
 
 export const getRandomInt = (upperBound = 100) => (Math.floor(Math.random() * upperBound));
 export const getFormattedDate = (eventDate, format = MODEL_DATE_FORMAT) => dayjs(eventDate).format(format);
 export const isEventUpcoming = (date) => !dayjs(date).isBefore(dayjs(), 'day');
 export const turnModelDateToFramework = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 export const compareDates = (a, b) => dayjs(a).diff(dayjs(b)) < 0;
+
+export const validateNumber = (num) => isNaN(num) ? 0 : Math.abs(num);
 
 export const getMockText = (len) => {
   const mockText = `
@@ -17,20 +19,6 @@ export const getMockText = (len) => {
   cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
   est laborum.`;
   return mockText.slice(0, len);
-};
-
-export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
 };
 
 export const filter = {
