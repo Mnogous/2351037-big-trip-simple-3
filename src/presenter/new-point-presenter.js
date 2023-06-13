@@ -1,6 +1,7 @@
 import { remove, render, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType } from '../mocks/const.js';
+import { UserAction, UpdateType } from '../const.js';
 import FormEditingView from '../view/form-editing-view.js';
+import { defaultPoint } from '../utils.js';
 
 export default class NewPointPresenter {
   #pointListContainer = null;
@@ -13,14 +14,33 @@ export default class NewPointPresenter {
     this.#changeData = changeData;
   }
 
-  init = (callback) => {
+  setSaving = () => {
+    this.#pointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  };
+
+  init = (callback, availableOffers, availableDestinations) => {
     this.#destroyCallback = callback;
 
     if (this.#pointEditComponent !== null) {
       return;
     }
 
-    this.#pointEditComponent = new FormEditingView();
+    this.#pointEditComponent = new FormEditingView(defaultPoint(), availableOffers, availableDestinations);
     this.#pointEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#pointEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
@@ -46,7 +66,7 @@ export default class NewPointPresenter {
     this.#changeData(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
-      {id: 4, ...point},
+      point,
     );
     this.destroy();
   };
@@ -56,7 +76,7 @@ export default class NewPointPresenter {
   };
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
+    if (evt.keyCode === 27) {
       evt.preventDefault();
       this.destroy();
     }

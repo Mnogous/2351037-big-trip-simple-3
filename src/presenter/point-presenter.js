@@ -1,7 +1,7 @@
 import {render, replace, remove} from '../framework/render.js';
 import FormEditingView from '../view/form-editing-view.js';
 import RoutePointView from '../view/route-point-view.js';
-import { UserAction, UpdateType } from '../mocks/const.js';
+import { UserAction, UpdateType } from '../const.js';
 import { compareDates } from '../utils.js';
 
 const Mode = {
@@ -16,6 +16,7 @@ export default class PointPresenter {
   #changeData = null;
   #changeMode = null;
   #point = null;
+  #availableOffers = [];
 
   #mode = Mode.DEFAULT;
 
@@ -25,14 +26,15 @@ export default class PointPresenter {
     this.#changeMode = changeMode;
   }
 
-  init(point) {
+  init(point, availableOffers, availableDestinations) {
     this.#point = point;
+    this.#availableOffers = availableOffers;
 
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
-    this.#pointComponent = new RoutePointView(point);
-    this.#pointEditComponent = new FormEditingView(point);
+    this.#pointComponent = new RoutePointView(point, availableOffers, availableDestinations);
+    this.#pointEditComponent = new FormEditingView(point, availableOffers, availableDestinations);
 
     this.#pointComponent.setEditButtonClickHandler(this.#handleEditClick);
     this.#pointEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
@@ -49,7 +51,8 @@ export default class PointPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#pointEditComponent, prevPointEditComponent);
+      replace(this.#pointComponent, prevPointEditComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     if (this.#pointsListContainer.element.contains(prevPointComponent.element)) {
@@ -64,9 +67,44 @@ export default class PointPresenter {
     remove(prevPointEditComponent);
   }
 
+  setSaving = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  };
+
+  setDeleting = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  };
+
+  setAborting = () => {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  };
+
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#pointEditComponent.reset(this.#point);
+      this.#pointEditComponent.reset(this.#point, this.#availableOffers);
       this.#replaceFormToPoint();
     }
   };
@@ -92,6 +130,7 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.keyCode === 27) {
       evt.preventDefault();
+      this.#pointEditComponent.reset(this.#point, this.#availableOffers);
       this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToPoint();
     }
@@ -102,7 +141,7 @@ export default class PointPresenter {
   };
 
   #handleFormSubmit = (update) => {
-    const isMinorUpdate = compareDates(update.date_from); // possible filter problems later
+    const isMinorUpdate = compareDates(update.date_from);
     this.#changeData(
       UserAction.UPDATE_POINT,
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
