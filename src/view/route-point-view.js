@@ -1,83 +1,82 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getFormattedDate, validateNumber, getAvailableOffers } from '../utils.js';
+import { getDate, getTime } from '../utils.js';
 
-const createPointTemplate = (point, availableOffers, availableDestinations) => {
-  availableOffers = getAvailableOffers(point.type, availableOffers);
-  const pointIcon = `img/icons/${point.type}.png`;
-
-  const getOffersMarkup = () => {
-    if (point.offers.length === 0) {
-      return `
+const createOffersTemplate = (type, offers, availableOffers) => {
+  const allOffers = Object.values(availableOffers);
+  const template = allOffers.filter( ({ type: pointType }) => type === pointType).map( ({ offers: typeOffers }) =>
+    typeOffers.filter( ({ id }) => offers.includes(id)).map( ({ title, price }) => `
       <li class="event__offer">
-      <span class="event__offer-title">No additional offers</span>
+        <span class="event__offer-title">${title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${price}</span>
       </li>
-      `;
-    } else {
-      const markup = [];
-      for (const offer of availableOffers) {
-        if (point.offers.includes(offer.id)) {
-          markup.push(`
-            <li class="event__offer">
-              <span class="event__offer-title">${offer.title}</span>
-              &plus;&euro;&nbsp;
-              <span class="event__offer-price">${offer.price}</span>
-            </li>
-          `);
-        }
-      }
-      return markup.join('\n');
-    }
-  };
+    `).join('')
+  ).join('');
 
-  return `<div class="event">
-    <time class="event__date" datetime="${getFormattedDate(point.date_from, 'YYYY-MM-DD')}">${getFormattedDate(point.date_from, 'MMM D')}</time>
-    <div class="event__type">
-      <img class="event__type-icon" width="42" height="42" src="${pointIcon}" alt="Event type icon">
-    </div>
-    <h3 class="event__title">${point.type} ${availableDestinations[point.destination - 1].name}</h3>
-    <div class="event__schedule">
-      <p class="event__time">
-        <time class="event__start-time" datetime="${getFormattedDate(point.date_from)}">${getFormattedDate(point.date_from, 'HH:mm')}</time>
-        &mdash;
-        <time class="event__end-time" datetime="${getFormattedDate(point.date_to)}">${getFormattedDate(point.date_to, 'HH:mm')}</time>
+  return template;
+};
+
+const createTripPointTemplate = (tripInfo, availableDestinations, availableOffers) => {
+  const {dateFrom, dateTo, offers, type, destination, basePrice} = tripInfo;
+
+  const tripDate = dateFrom !== null ? getDate(dateFrom) : 'No data';
+  const tripTimeFrom = dateFrom !== null ? getTime(dateFrom) : 'No time';
+  const tripTimeTo = dateTo !== null ? getTime(dateTo) : 'No time';
+  const destinationName = destination !== null ? availableDestinations[destination - 1].name : 'No destination';
+
+  return `
+  <li class="trip-events__item">
+    <div class="event">
+      <time class="event__date" datetime="2019-03-18">${tripDate}</time>
+      <div class="event__type">
+        <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
+      </div>
+      <h3 class="event__title">${type} ${destinationName}</h3>
+      <div class="event__schedule">
+        <p class="event__time">
+          <time class="event__start-time" datetime="2019-03-18T10:30">${tripTimeFrom}</time>
+          &mdash;
+          <time class="event__end-time" datetime="2019-03-18T11:00">${tripTimeTo}</time>
+        </p>
+      </div>
+      <p class="event__price">
+        &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
       </p>
+      <h4 class="visually-hidden">Offers:</h4>
+      <ul class="event__selected-offers">
+        ${createOffersTemplate(type, offers, availableOffers)}
+      </ul>
+      <button class="event__rollup-btn" type="button">
+        <span class="visually-hidden">Open event</span>
+      </button>
     </div>
-    <p class="event__price">
-      &euro;&nbsp;<span class="event__price-value">${validateNumber(point.base_price)}</span>
-    </p>
-    <h4 class="visually-hidden">Offers:</h4>
-    <ul class="event__selected-offers">
-      ${getOffersMarkup()}
-    </ul>
-    <button class="event__rollup-btn" type="button">
-      <span class="visually-hidden">Open event</span>
-    </button>
-  </div>`;
+  </li>
+  `;
 };
 
 export default class RoutePointView extends AbstractView {
-  #element = null;
-  #availableOffers = [];
-  #availableDestinations = [];
+  #point = null;
+  #availableDestinations = null;
+  #availableOffers = null;
 
-  constructor(point, availableOffers = [], availableDestinations = []) {
+  constructor(destinations, offers, point) {
     super();
-    this.#element = point;
-    this.#availableOffers = availableOffers;
-    this.#availableDestinations = availableDestinations;
+    this.#availableDestinations = destinations;
+    this.#availableOffers = offers;
+    this.#point = point;
   }
 
   get template() {
-    return createPointTemplate(this.#element, this.#availableOffers, this.#availableDestinations);
+    return createTripPointTemplate(this.#point, this.#availableDestinations, this.#availableOffers);
   }
 
-  setEditButtonClickHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  setEditClickHandler = (callback) => {
+    this._callback.openEditor = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   };
 
-  #clickHandler = (evt) => {
+  #editClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.click();
+    this._callback.openEditor();
   };
 }
