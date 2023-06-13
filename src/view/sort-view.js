@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { SortType } from '../mocks/const.js';
+import { SortType } from '../const.js';
 
 const createSortItemTemplate = (sortName, sortStatus) => `
   <div class="trip-sort__item  trip-sort__item--${sortName}">

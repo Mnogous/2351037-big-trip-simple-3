@@ -1,5 +1,5 @@
 import { getRandomInt, getMockText, sort, filter, getFormattedDate } from '../utils.js';
-import { POINT_TYPES } from './const.js';
+import { POINT_TYPES } from '../const.js';
 import dayjs from 'dayjs';
 
 const generatePictures = () => {

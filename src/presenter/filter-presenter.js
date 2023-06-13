@@ -1,13 +1,12 @@
 import { render, replace, remove } from '../framework/render.js';
-import { FilterType, UpdateType } from '../mocks/const.js';
+import { FilterType, UpdateType } from '../const.js';
 import FilterView from '../view/filter-view.js';
 
 export default class FilterPresenter {
   #filterContainer = null;
+  #filterComponent = null;
   #filterModel = null;
   #pointsModel = null;
-
-  #filterComponent = null;
 
   constructor(filterContainer, filterModel, pointsModel) {
     this.#filterContainer = filterContainer;

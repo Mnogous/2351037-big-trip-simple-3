@@ -1,9 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getFormattedDate, validateNumber } from '../utils.js';
-import { destinationsStorage, offersStorage, getDefaultPoint } from '../mocks/mock.js';
+import { getFormattedDate, validateNumber, getAvailableOffers } from '../utils.js';
 
-const createPointTemplate = (point) => {
+const createPointTemplate = (point, availableOffers, availableDestinations) => {
+  availableOffers = getAvailableOffers(point.type, availableOffers);
   const pointIcon = `img/icons/${point.type}.png`;
+
   const getOffersMarkup = () => {
     if (point.offers.length === 0) {
       return `
@@ -13,15 +14,16 @@ const createPointTemplate = (point) => {
       `;
     } else {
       const markup = [];
-      for (const id of point.offers) {
-        const offer = offersStorage[id];
-        markup.push(`
-          <li class="event__offer">
-            <span class="event__offer-title">${offer.title}</span>
-            &plus;&euro;&nbsp;
-            <span class="event__offer-price">${offer.price}</span>
-          </li>
-        `);
+      for (const offer of availableOffers) {
+        if (point.offers.includes(offer.id)) {
+          markup.push(`
+            <li class="event__offer">
+              <span class="event__offer-title">${offer.title}</span>
+              &plus;&euro;&nbsp;
+              <span class="event__offer-price">${offer.price}</span>
+            </li>
+          `);
+        }
       }
       return markup.join('\n');
     }
@@ -32,7 +34,7 @@ const createPointTemplate = (point) => {
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="${pointIcon}" alt="Event type icon">
     </div>
-    <h3 class="event__title">${point.type} ${destinationsStorage[point.destination].name}</h3>
+    <h3 class="event__title">${point.type} ${availableDestinations[point.destination - 1].name}</h3>
     <div class="event__schedule">
       <p class="event__time">
         <time class="event__start-time" datetime="${getFormattedDate(point.date_from)}">${getFormattedDate(point.date_from, 'HH:mm')}</time>
@@ -55,14 +57,18 @@ const createPointTemplate = (point) => {
 
 export default class RoutePointView extends AbstractView {
   #element = null;
+  #availableOffers = [];
+  #availableDestinations = [];
 
-  constructor(point = getDefaultPoint()) {
+  constructor(point, availableOffers = [], availableDestinations = []) {
     super();
     this.#element = point;
+    this.#availableOffers = availableOffers;
+    this.#availableDestinations = availableDestinations;
   }
 
   get template() {
-    return createPointTemplate(this.#element);
+    return createPointTemplate(this.#element, this.#availableOffers, this.#availableDestinations);
   }
 
   setEditButtonClickHandler = (callback) => {
