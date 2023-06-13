@@ -1,6 +1,6 @@
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { RenderPosition, render, remove } from '../framework/render.js';
-import { filter, sortDays, sortPrices } from '../utils.js';
+import { Filter, sortDays, sortPrices } from '../utils.js';
 import { SortType, UserAction, UpdateType, FilterType } from '../const.js';
 import NewPointPresenter from './new-point-presenter.js';
 import PointPresenter from './point-presenter.js';
@@ -37,9 +37,7 @@ export default class ListPresenter {
     this.#container = container;
     this.#tripPointsModel = tripPointsModel;
     this.#filterModel = filterModel;
-
     this.#newPointPresenter = new NewPointPresenter(this.#tripPointsList.element, this.#handleViewAction);
-
     this.#tripPointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
@@ -51,7 +49,7 @@ export default class ListPresenter {
   get points() {
     this.#filterType = this.#filterModel.filter;
     const points = this.#tripPointsModel.points;
-    const filteredPoints = filter[this.#filterType](points);
+    const filteredPoints = Filter[this.#filterType](points);
 
     switch (this.#sortType) {
       case SortType.DAY:
