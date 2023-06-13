@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { FilterType } from './const';
+import { FilterType } from './const.js';
 
 export const getDate = (date) => dayjs(date).format('MMM D');
 export const getTime = (date) => dayjs(date).format('HH-mm');
@@ -37,7 +37,7 @@ const isDateFuture = (date) => {
   return targetDate.isAfter(currentDate, 'm');
 };
 
-export const filter = {
+export const Filter = {
   [FilterType.EVERYTHING]: (points) => points,
   [FilterType.FUTURE]: (points) => points.filter((point) => isDateFuture(point.dateTo)),
 };

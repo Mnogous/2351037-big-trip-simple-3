@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getFullDataTime, isFormValid } from '../utils.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { getFullDataTime, isFormValid } from '../utils.js';
 
 const POINT_TEMPLATE = {
   type: 'flight',
@@ -71,7 +71,8 @@ const createTypeImageTemplate = (currentType, availableOffers) => Object.values(
     const checkedValue = type === currentType ? 'checked' : '';
     return `
       <div class="event__type-item">
-        <input id="event-type-${type}-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="${type}" ${checkedValue}>
+        <input id="event-type-${type}-1" class="event__type-input visually-hidden" type="radio" name="event-type"
+          value="${type}" ${checkedValue}>
         <label class="event__type-label event__type-label--${type}" for="event-type-${type}-1">${type}</label>
       </div>
     `;
@@ -137,7 +138,8 @@ const createPointEditorTemplate = (data, isPointNew, availableDestinations, avai
         <label class="event__label  event__type-output" for="event-destination-1">
           ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationName}" list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
+          value="${destinationName}" list="destination-list-1">
         <datalist id="destination-list-1">
           ${createDestinationListTemplate(availableDestinations)}
         </datalist>
@@ -156,7 +158,8 @@ const createPointEditorTemplate = (data, isPointNew, availableDestinations, avai
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}" pattern="[0-9]*">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}"
+          pattern="[0-9]*">
       </div>
 
       ${buttonsTemplate}

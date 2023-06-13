@@ -1,8 +1,8 @@
-import {render, replace, remove} from '../framework/render.js';
-import FormEditingView from '../view/form-editing-view.js';
-import RoutePointView from '../view/route-point-view.js';
+import { render, replace, remove } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
 import { isDatesEqual } from '../utils.js';
+import FormEditingView from '../view/form-editing-view.js';
+import RoutePointView from '../view/route-point-view.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -12,14 +12,11 @@ const Mode = {
 export default class PointPresenter {
   #pointComponent = null;
   #pointEditorComponent = null;
-
   #container = null;
   #changeData = null;
   #changeMode = null;
-
   #point = null;
   #mode = Mode.DEFAULT;
-
   #availableDestinations = null;
   #availableOffers = null;
 
@@ -27,22 +24,17 @@ export default class PointPresenter {
     this.#container = container;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
-
     this.#availableDestinations = destinations;
     this.#availableOffers = offers;
   }
 
   init(point) {
     this.#point = point;
-
     const prevPointComponent = this.#pointComponent;
     const prevPointEditorComponent = this.#pointEditorComponent;
-
     this.#pointComponent = new RoutePointView(this.#availableDestinations, this.#availableOffers, point);
     this.#pointEditorComponent = new FormEditingView(this.#availableDestinations, this.#availableOffers, point);
-
     this.#pointComponent.setEditClickHandler(this.#replacePointToForm);
-
     this.#pointEditorComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#pointEditorComponent.setCloseButtonClickHandler(this.#replaceFormToPoint);
     this.#pointEditorComponent.setDeleteButtonClickHandler(this.#handleDeleteClick);

@@ -1,9 +1,9 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { FilterType } from '../const.js';
-import { filter } from '../utils.js';
+import { Filter } from '../utils.js';
 
 const createPointFiltersTemplate = (currentFilter, points) => {
-  const futurePointsCount = filter['future'](points).length;
+  const futurePointsCount = Filter['future'](points).length;
   return `
     <form class="trip-filters" action="#" method="get">
       <div class="trip-filters__filter">
